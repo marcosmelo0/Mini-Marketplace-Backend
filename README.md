@@ -64,7 +64,7 @@ O servidor estará rodando em `http://localhost:3000` 🚀
    DATABASE_URL="postgresql://postgres:password@localhost:5432/marketplace?schema=public"
 
    # Autenticação (JWT)
-   JWT_SECRET="sua_chave_secreta_aqui"
+   JWT_SECRET="supersecretkey"
 
    # Busca (Elasticsearch)
    ELASTICSEARCH_NODE="http://localhost:9200"
