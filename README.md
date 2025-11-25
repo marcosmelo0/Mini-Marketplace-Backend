@@ -25,7 +25,7 @@ Se você já tem **Docker** e **Node.js** instalados, rode estes comandos para v
 
 ```bash
 # 1. Clone o projeto
-git clone <seu-repositorio>
+git clone https://github.com/marcosmelo0/Mini-Marketplace-Backend.git
 cd mini-marketplace
 
 # 2. Instale dependências
@@ -64,7 +64,7 @@ O servidor estará rodando em `http://localhost:3000` 🚀
    DATABASE_URL="postgresql://postgres:password@localhost:5432/marketplace?schema=public"
 
    # Autenticação (JWT)
-   JWT_SECRET="sua_chave_secreta_aqui"
+   JWT_SECRET="supersecretkey"
 
    # Busca (Elasticsearch)
    ELASTICSEARCH_NODE="http://localhost:9200"
