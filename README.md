@@ -25,7 +25,7 @@ Se você já tem **Docker** e **Node.js** instalados, rode estes comandos para v
 
 ```bash
 # 1. Clone o projeto
-git clone <seu-repositorio>
+git clone https://github.com/marcosmelo0/Mini-Marketplace-Backend.git
 cd mini-marketplace
 
 # 2. Instale dependências
