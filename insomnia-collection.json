@@ -1,0 +1,621 @@
+{
+    "_type": "export",
+    "__export_format": 4,
+    "__export_date": "2025-11-25T16:00:00.000Z",
+    "__export_source": "insomnia.desktop.app:v2023.5.8",
+    "resources": [
+        {
+            "_id": "wrk_mini_marketplace",
+            "_type": "workspace",
+            "name": "Mini Marketplace API",
+            "description": "Collection de requisições para o Mini Marketplace de Serviços",
+            "scope": "collection"
+        },
+        {
+            "_id": "env_base",
+            "_type": "environment",
+            "name": "Base Environment",
+            "data": {
+                "base_url": "http://localhost:3000",
+                "token": "{% response 'body', 'req_a552b3f6c8fc46219cfebf2b295610e2', 'b64::JC50b2tlbg==::46b', 'never', 60 %}",
+                "refreshToken": "{% response 'body', 'req_a552b3f6c8fc46219cfebf2b295610e2', 'b64::JC5yZWZyZXNoVG9rZW4=::46b', 'never', 60 %}"
+            },
+            "parentId": "wrk_mini_marketplace"
+        },
+        {
+            "_id": "folder_auth",
+            "_type": "request_group",
+            "name": "🔐 Autenticação",
+            "parentId": "wrk_mini_marketplace"
+        },
+        {
+            "_id": "req_register_provider",
+            "_type": "request",
+            "name": "Registrar Provedor",
+            "method": "POST",
+            "url": "{{ _.base_url }}/auth/register",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"email\": \"provedor@exemplo.com\",\n  \"password\": \"senha123\",\n  \"name\": \"João Silva\",\n  \"role\": \"PROVIDER\",\n  \"phone\": \"11987654321\"\n}"
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "parentId": "folder_auth"
+        },
+        {
+            "_id": "req_register_client",
+            "_type": "request",
+            "name": "Registrar Cliente",
+            "method": "POST",
+            "url": "{{ _.base_url }}/auth/register",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"email\": \"cliente@exemplo.com\",\n  \"password\": \"senha123\",\n  \"name\": \"Maria Santos\",\n  \"role\": \"CLIENT\",\n  \"phone\": \"11912345678\"\n}"
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "parentId": "folder_auth"
+        },
+        {
+            "_id": "req_login",
+            "_type": "request",
+            "name": "Login",
+            "method": "POST",
+            "url": "{{ _.base_url }}/auth/login",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"email\": \"joao.barbeiro@email.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "parentId": "folder_auth"
+        },
+        {
+            "_id": "req_refresh",
+            "_type": "request",
+            "name": "Refresh Token",
+            "method": "POST",
+            "url": "{{ _.base_url }}/auth/refresh",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"refreshToken\": \"{{ _.refreshToken }}\"\n}"
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "parentId": "folder_auth"
+        },
+        {
+            "_id": "folder_users",
+            "_type": "request_group",
+            "name": "👤 Usuários",
+            "parentId": "wrk_mini_marketplace"
+        },
+        {
+            "_id": "req_get_profile",
+            "_type": "request",
+            "name": "Meu Perfil",
+            "method": "GET",
+            "url": "{{ _.base_url }}/users/profile",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_users"
+        },
+        {
+            "_id": "req_update_profile",
+            "_type": "request",
+            "name": "Atualizar Perfil",
+            "method": "PUT",
+            "url": "{{ _.base_url }}/users/profile",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"name\": \"João Silva Atualizado\",\n  \"phone\": \"11999887766\"\n}"
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                },
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_users"
+        },
+        {
+            "_id": "req_list_providers",
+            "_type": "request",
+            "name": "Listar Provedores (Público)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/users/providers",
+            "parameters": [
+                {
+                    "name": "page",
+                    "value": "1"
+                },
+                {
+                    "name": "limit",
+                    "value": "20"
+                }
+            ],
+            "headers": [],
+            "parentId": "folder_users"
+        },
+        {
+            "_id": "folder_services",
+            "_type": "request_group",
+            "name": "🛍️ Serviços",
+            "parentId": "wrk_mini_marketplace"
+        },
+        {
+            "_id": "req_list_services",
+            "_type": "request",
+            "name": "Listar Serviços (Público)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/services",
+            "parameters": [
+                {
+                    "name": "page",
+                    "value": "1"
+                },
+                {
+                    "name": "limit",
+                    "value": "20"
+                },
+                {
+                    "name": "category",
+                    "value": "Barbearia",
+                    "disabled": true
+                }
+            ],
+            "headers": [],
+            "parentId": "folder_services"
+        },
+        {
+            "_id": "req_get_service_types",
+            "_type": "request",
+            "name": "Listar Tipos de Serviços (Público)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/services/types",
+            "headers": [],
+            "parentId": "folder_services"
+        },
+        {
+            "_id": "req_popular_services",
+            "_type": "request",
+            "name": "Serviços Populares (Público)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/services/popular",
+            "parameters": [
+                {
+                    "name": "page",
+                    "value": "1"
+                },
+                {
+                    "name": "limit",
+                    "value": "10"
+                }
+            ],
+            "headers": [],
+            "parentId": "folder_services"
+        },
+        {
+            "_id": "req_get_service",
+            "_type": "request",
+            "name": "Obter Serviço por ID (Público)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/services/SERVICE_ID_AQUI",
+            "headers": [],
+            "parentId": "folder_services"
+        },
+        {
+            "_id": "req_create_service",
+            "_type": "request",
+            "name": "Criar Serviço (Provedor)",
+            "method": "POST",
+            "url": "{{ _.base_url }}/services",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"name\": \"Corte de Cabelo Masculino\",\n  \"description\": \"Corte de cabelo profissional com acabamento\",\n  \"category\": \"Barbearia\",\n  \"photos\": [],\n  \"variations\": [\n    {\n      \"name\": \"Corte + Barba\",\n      \"price\": 80.00,\n      \"duration_minutes\": 90\n    },\n    {\n      \"name\": \"Corte Infantil\",\n      \"price\": 35.00,\n      \"duration_minutes\": 45\n    }\n  ]\n}"
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                },
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_services"
+        },
+        {
+            "_id": "req_my_services",
+            "_type": "request",
+            "name": "Meus Serviços (Provedor)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/services/provider/my-services",
+            "parameters": [
+                {
+                    "name": "page",
+                    "value": "1"
+                },
+                {
+                    "name": "limit",
+                    "value": "20"
+                }
+            ],
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_services"
+        },
+        {
+            "_id": "req_update_service",
+            "_type": "request",
+            "name": "Atualizar Serviço (Provedor)",
+            "method": "PUT",
+            "url": "{{ _.base_url }}/services/SERVICE_ID_AQUI",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"name\": \"Corte de Cabelo Masculino Premium\",\n  \"description\": \"Corte de cabelo profissional com acabamento premium\",\n  \"category\": \"Barbearia\",\n  \"photos\": []\n}"
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                },
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_services"
+        },
+        {
+            "_id": "req_delete_service",
+            "_type": "request",
+            "name": "Deletar Serviço (Provedor)",
+            "method": "DELETE",
+            "url": "{{ _.base_url }}/services/SERVICE_ID_AQUI",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_services"
+        },
+        {
+            "_id": "folder_bookings",
+            "_type": "request_group",
+            "name": "📅 Agendamentos",
+            "parentId": "wrk_mini_marketplace"
+        },
+        {
+            "_id": "req_create_booking",
+            "_type": "request",
+            "name": "Criar Agendamento (Cliente)",
+            "method": "POST",
+            "url": "{{ _.base_url }}/bookings",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"serviceVariationId\": \"VARIATION_ID_AQUI\",\n  \"start_time\": \"2025-11-25T10:00:00-03:00\"\n}"
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                },
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_bookings"
+        },
+        {
+            "_id": "req_client_bookings",
+            "_type": "request",
+            "name": "Meus Agendamentos (Cliente)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/bookings/client/my-bookings",
+            "parameters": [
+                {
+                    "name": "page",
+                    "value": "1"
+                },
+                {
+                    "name": "limit",
+                    "value": "20"
+                }
+            ],
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_bookings"
+        },
+        {
+            "_id": "req_provider_bookings",
+            "_type": "request",
+            "name": "Agendamentos Recebidos (Provedor)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/bookings/provider/my-bookings",
+            "parameters": [
+                {
+                    "name": "page",
+                    "value": "1"
+                },
+                {
+                    "name": "limit",
+                    "value": "20"
+                }
+            ],
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_bookings"
+        },
+        {
+            "_id": "req_cancel_booking",
+            "_type": "request",
+            "name": "Cancelar Agendamento",
+            "method": "PATCH",
+            "url": "{{ _.base_url }}/bookings/BOOKING_ID_AQUI/cancel",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_bookings"
+        },
+        {
+            "_id": "folder_reviews",
+            "_type": "request_group",
+            "name": "⭐ Avaliações",
+            "parentId": "wrk_mini_marketplace"
+        },
+        {
+            "_id": "req_create_review",
+            "_type": "request",
+            "name": "Criar Avaliação (Cliente)",
+            "method": "POST",
+            "url": "{{ _.base_url }}/reviews",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"serviceId\": \"SERVICE_ID_AQUI\",\n  \"rating\": 5,\n  \"comment\": \"Excelente serviço! Muito profissional e atencioso.\"\n}"
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                },
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_reviews"
+        },
+        {
+            "_id": "req_get_reviews",
+            "_type": "request",
+            "name": "Listar Avaliações de um Serviço (Público)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/reviews/services/SERVICE_ID_AQUI",
+            "parameters": [
+                {
+                    "name": "page",
+                    "value": "1"
+                },
+                {
+                    "name": "limit",
+                    "value": "20"
+                }
+            ],
+            "headers": [],
+            "parentId": "folder_reviews"
+        },
+        {
+            "_id": "folder_availabilities",
+            "_type": "request_group",
+            "name": "📅 Disponibilidades",
+            "parentId": "wrk_mini_marketplace"
+        },
+        {
+            "_id": "req_create_availability",
+            "_type": "request",
+            "name": "Criar Disponibilidade (Provedor)",
+            "method": "POST",
+            "url": "{{ _.base_url }}/availabilities",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"day_of_week\": 1,\n  \"start_time\": \"09:00\",\n  \"end_time\": \"18:00\"\n}"
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                },
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_availabilities"
+        },
+        {
+            "_id": "req_my_availabilities",
+            "_type": "request",
+            "name": "Minhas Disponibilidades (Provedor)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/availabilities/my-availabilities",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_availabilities"
+        },
+        {
+            "_id": "req_update_availability",
+            "_type": "request",
+            "name": "Atualizar Disponibilidade (Provedor)",
+            "method": "PUT",
+            "url": "{{ _.base_url }}/availabilities/AVAILABILITY_ID_AQUI",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"start_time\": \"10:00\",\n  \"end_time\": \"19:00\"\n}"
+            },
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                },
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_availabilities"
+        },
+        {
+            "_id": "req_delete_availability",
+            "_type": "request",
+            "name": "Deletar Disponibilidade (Provedor)",
+            "method": "DELETE",
+            "url": "{{ _.base_url }}/availabilities/AVAILABILITY_ID_AQUI",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_availabilities"
+        },
+        {
+            "_id": "folder_notifications",
+            "_type": "request_group",
+            "name": "🔔 Notificações",
+            "parentId": "wrk_mini_marketplace"
+        },
+        {
+            "_id": "req_my_notifications",
+            "_type": "request",
+            "name": "Minhas Notificações (Provedor)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/notifications/my-notifications",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_notifications"
+        },
+        {
+            "_id": "req_unread_count",
+            "_type": "request",
+            "name": "Contar Não Lidas (Provedor)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/notifications/unread-count",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_notifications"
+        },
+        {
+            "_id": "req_mark_read",
+            "_type": "request",
+            "name": "Marcar como Lida (Provedor)",
+            "method": "PATCH",
+            "url": "{{ _.base_url }}/notifications/NOTIFICATION_ID_AQUI/read",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
+            "parentId": "folder_notifications"
+        },
+        {
+            "_id": "folder_search",
+            "_type": "request_group",
+            "name": "🔍 Busca",
+            "parentId": "wrk_mini_marketplace"
+        },
+        {
+            "_id": "req_search",
+            "_type": "request",
+            "name": "Buscar Serviços (Público)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/search",
+            "parameters": [
+                {
+                    "name": "q",
+                    "value": "corte"
+                },
+                {
+                    "name": "page",
+                    "value": "1"
+                },
+                {
+                    "name": "limit",
+                    "value": "20"
+                }
+            ],
+            "headers": [],
+            "parentId": "folder_search"
+        },
+        {
+            "_id": "folder_health",
+            "_type": "request_group",
+            "name": "❤️ Health Check",
+            "parentId": "wrk_mini_marketplace"
+        },
+        {
+            "_id": "req_health",
+            "_type": "request",
+            "name": "Health Check",
+            "method": "GET",
+            "url": "{{ _.base_url }}/health",
+            "headers": [],
+            "parentId": "folder_health"
+        }
+    ]
+}
