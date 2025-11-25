@@ -1,0 +1,139 @@
+generator client {
+    provider = "prisma-client-js"
+    output   = "../src/lib/generated/prisma"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+enum Role {
+    CLIENT
+    PROVIDER
+}
+
+enum BookingStatus {
+    CONFIRMED
+    CANCELLED
+    COMPLETED
+}
+
+model User {
+    id            String   @id @default(uuid())
+    name          String
+    email         String   @unique
+    password_hash String
+    role          Role     @default(CLIENT)
+    phone         String?
+    created_at    DateTime @default(now())
+    updated_at    DateTime @updatedAt
+
+    services       Service[]
+    availabilities Availability[]
+    bookings       Booking[]
+    refreshTokens  RefreshToken[]
+    reviews        Review[]
+    notifications  Notification[]
+}
+
+model RefreshToken {
+    id         String   @id @default(uuid())
+    userId     String
+    token      String   @unique
+    expiresAt  DateTime
+    created_at DateTime @default(now())
+    revoked    Boolean  @default(false)
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model Service {
+    id          String   @id @default(uuid())
+    providerId  String
+    name        String
+    description String
+    category    String // Nova: Categoria do serviço (ex: "Manicure", "Barbeiro")
+    photos      String[] // Array of URLs
+    created_at  DateTime @default(now())
+    updated_at  DateTime @updatedAt
+
+    provider   User               @relation(fields: [providerId], references: [id])
+    variations ServiceVariation[]
+    reviews    Review[]
+
+    @@index([category]) // Índice para filtrar por categoria
+}
+
+model ServiceVariation {
+    id                  String   @id @default(uuid())
+    serviceId           String
+    name                String
+    price               Decimal
+    duration_minutes    Int
+    discount_percentage Int?     @default(0) // Nova: Desconto em %
+    discount_days       Int[]    @default([]) // Nova: Dias da semana com desconto (0-6)
+    created_at          DateTime @default(now())
+    updated_at          DateTime @updatedAt
+
+    service  Service   @relation(fields: [serviceId], references: [id])
+    bookings Booking[]
+}
+
+model Availability {
+    id          String   @id @default(uuid())
+    providerId  String
+    day_of_week Int // 0-6 (Sun-Sat)
+    start_time  DateTime // Using DateTime to store time, ignoring date part or using a specific epoch
+    end_time    DateTime
+    created_at  DateTime @default(now())
+    updated_at  DateTime @updatedAt
+
+    provider User @relation(fields: [providerId], references: [id])
+}
+
+model Booking {
+    id                 String        @id @default(uuid())
+    clientId           String
+    serviceVariationId String
+    start_time         DateTime
+    end_time           DateTime
+    status             BookingStatus @default(CONFIRMED)
+    final_price        Decimal? // Nova: Preço final após desconto
+    created_at         DateTime      @default(now())
+    updated_at         DateTime      @updatedAt
+
+    client           User             @relation(fields: [clientId], references: [id])
+    serviceVariation ServiceVariation @relation(fields: [serviceVariationId], references: [id])
+    notifications    Notification[]
+}
+
+model Review {
+    id         String   @id @default(uuid())
+    serviceId  String
+    clientId   String
+    rating     Int // 1-5
+    comment    String?
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    service Service @relation(fields: [serviceId], references: [id])
+    client  User    @relation(fields: [clientId], references: [id])
+
+    @@unique([serviceId, clientId]) // Um cliente só pode avaliar um serviço uma vez
+}
+
+model Notification {
+    id         String   @id @default(uuid())
+    providerId String
+    type       String // "NEW_BOOKING", "BOOKING_CANCELLED"
+    title      String
+    message    String
+    read       Boolean  @default(false)
+    bookingId  String?
+    created_at DateTime @default(now())
+
+    provider User     @relation(fields: [providerId], references: [id])
+    booking  Booking? @relation(fields: [bookingId], references: [id])
+
+    @@index([providerId, read])
+}
