@@ -141,7 +141,6 @@ A API é RESTful e retorna dados em JSON. Abaixo estão as principais rotas.
 
 > **Dica**: Importe o arquivo `insomnia-collection.json` (na raiz do projeto) no **Insomnia** para testar todas as rotas prontamente.
 
-> **Documentação Completa**: Veja o arquivo [BACKEND_SPEC.md](./BACKEND_SPEC.md) para documentação detalhada de todos os endpoints, modelos de dados e regras de negócio.
 
 ### 🔐 Autenticação
 | Método | Rota | Descrição |
@@ -370,19 +369,6 @@ NODE_ENV=production
    ```bash
    npm start
    ```
-
----
-
-## 📚 Documentação Adicional
-
-- **[BACKEND_SPEC.md](./BACKEND_SPEC.md)**: Documentação completa da API com todos os endpoints, modelos de dados, fluxos e regras de negócio
-- **[insomnia-collection.json](./insomnia-collection.json)**: Coleção do Insomnia para testar todos os endpoints
-
----
-
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou pull requests.
 
 ---
 
