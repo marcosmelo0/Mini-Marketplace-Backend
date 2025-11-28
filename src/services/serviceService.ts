@@ -4,33 +4,16 @@ import { getCache, setCache, deleteCachePattern, incrementServiceViews } from '.
 
 export const SERVICE_TYPES = [
     'Manicure',
-    'Pedicure',
     'Cabelereiro',
     'Barbeiro',
     'Maquiagem',
-    'Depilação',
     'Massagem',
-    'Limpeza de Pele',
     'Eletricista',
     'Encanador',
-    'Pintor',
-    'Pedreiro',
     'Jardineiro',
     'Diarista',
-    'Babá',
-    'Cuidador de Idosos',
-    'Passeador de Cães',
-    'Adestrador',
     'Personal Trainer',
-    'Nutricionista',
-    'Psicólogo',
-    'Professor Particular',
     'Fotógrafo',
-    'Videomaker',
-    'DJ',
-    'Músico',
-    'Buffet',
-    'Decoração',
     'Outros'
 ];
 
@@ -58,7 +41,7 @@ export const getServiceById = async (id: string) => {
 
     const service = await serviceRepository.findServiceById(id);
     if (!service) {
-        throw new Error('Service not found');
+        throw new Error('Serviço não encontrado');
     }
 
     // Incrementar visualizações
@@ -123,10 +106,10 @@ export const getAllServices = async (page: number = 1, limit: number = 20, categ
 export const updateService = async (id: string, providerId: string, data: any) => {
     const service = await serviceRepository.findServiceById(id);
     if (!service) {
-        throw new Error('Service not found');
+        throw new Error('Serviço não encontrado');
     }
     if (service.providerId !== providerId) {
-        throw new Error('Unauthorized');
+        throw new Error('Não autorizado');
     }
     const updatedService = await serviceRepository.updateService(id, data);
     await searchService.indexService(updatedService);
@@ -139,10 +122,10 @@ export const updateService = async (id: string, providerId: string, data: any) =
 export const deleteService = async (id: string, providerId: string) => {
     const service = await serviceRepository.findServiceById(id);
     if (!service) {
-        throw new Error('Service not found');
+        throw new Error('Serviço não encontrado');
     }
     if (service.providerId !== providerId) {
-        throw new Error('Unauthorized');
+        throw new Error('Não autorizado');
     }
     await serviceRepository.deleteService(id);
     await searchService.removeService(id);

@@ -11,7 +11,7 @@ export const createReview = async (
     // 1. Verificar se o serviço existe
     const service = await serviceRepository.findServiceById(serviceId);
     if (!service) {
-        throw new Error('Service not found');
+        throw new Error('Serviço não encontrado');
     }
 
     // 2. Verificar se o cliente já contratou este serviço e se o status é COMPLETED ou CONFIRMED
@@ -26,7 +26,7 @@ export const createReview = async (
     );
 
     if (!hasBookingForService) {
-        throw new Error('You can only review services you have booked');
+        throw new Error('Você só pode avaliar serviços que agendou');
     }
 
     // 3. Criar review
@@ -40,7 +40,7 @@ export const createReview = async (
         return review;
     } catch (error: any) {
         if (error.code === 'P2002') {
-            throw new Error('You have already reviewed this service');
+            throw new Error('Você já avaliou este serviço');
         }
         throw error;
     }

@@ -31,6 +31,10 @@ export const removeService = async (serviceId: string) => {
     }
 };
 
+import { prisma } from '../config/prisma';
+
+// ... existing imports
+
 export const searchServices = async (query: string, page: number = 1, limit: number = 20) => {
     try {
         const validPage = Math.max(1, page);
@@ -50,10 +54,43 @@ export const searchServices = async (query: string, page: number = 1, limit: num
             },
         });
 
-        const data = result.hits.hits.map((hit) => ({
-            id: hit._id,
-            ...(hit._source as any),
-        }));
+        const ids = result.hits.hits.map((hit) => hit._id);
+
+        if (ids.length === 0) {
+            return {
+                data: [],
+                pagination: {
+                    total: 0,
+                    page: validPage,
+                    limit: validLimit,
+                    totalPages: 0,
+                },
+            };
+        }
+
+        // Buscar detalhes completos no banco de dados
+        const services = await prisma.service.findMany({
+            where: {
+                id: { in: ids },
+            },
+            include: {
+                provider: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phone: true,
+                    }
+                },
+                variations: true,
+            },
+        });
+
+        // Ordenar os resultados do banco na mesma ordem do Elasticsearch
+        const serviceMap = new Map(services.map(s => [s.id, s]));
+        const data = ids
+            .map(id => serviceMap.get(id))
+            .filter(item => item !== undefined);
 
         return {
             data,

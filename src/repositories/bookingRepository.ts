@@ -3,9 +3,20 @@ import prisma from '../config/prisma';
 
 export type BookingWithVariation = Prisma.BookingGetPayload<{
     include: {
+        client: true;
         serviceVariation: {
             include: {
-                service: true
+                service: {
+                    include: {
+                        provider: {
+                            select: {
+                                id: true;
+                                name: true;
+                                email: true;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -49,7 +60,17 @@ export const findBookingById = async (id: string): Promise<BookingWithVariation 
             client: true,
             serviceVariation: {
                 include: {
-                    service: true,
+                    service: {
+                        include: {
+                            provider: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                },
+                            },
+                        },
+                    },
                 },
             },
         },
@@ -182,6 +203,39 @@ export const updateBookingStatus = async (
                     service: true,
                 },
             },
+        },
+    });
+};
+
+/**
+ * Buscar agendamentos confirmados de um prestador em uma data específica
+ */
+export const findBookingsByProviderAndDate = async (
+    providerId: string,
+    date: Date
+): Promise<Booking[]> => {
+    // Início e fim do dia
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return prisma.booking.findMany({
+        where: {
+            serviceVariation: {
+                service: {
+                    providerId,
+                },
+            },
+            status: 'CONFIRMED',
+            start_time: {
+                gte: startOfDay,
+                lte: endOfDay,
+            },
+        },
+        orderBy: {
+            start_time: 'asc',
         },
     });
 };

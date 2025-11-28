@@ -2,6 +2,7 @@ import * as bookingRepository from '../repositories/bookingRepository';
 import * as serviceRepository from '../repositories/serviceRepository';
 import * as availabilityService from './availabilityService';
 import * as notificationService from './notificationService';
+import * as emailService from './emailService';
 import { invalidateSlots } from '../config/redis';
 import { toZonedTime } from 'date-fns-tz';
 import { format } from 'date-fns';
@@ -18,12 +19,12 @@ export const createBooking = async (
     // Get service variation to calculate end time
     const variation = await serviceRepository.findServiceVariationById(data.serviceVariationId);
     if (!variation) {
-        throw new Error('Service variation not found');
+        throw new Error('Variação de serviço não encontrada');
     }
 
     const service = await serviceRepository.findServiceById(variation.serviceId);
     if (!service) {
-        throw new Error('Service not found');
+        throw new Error('Serviço não encontrado');
     }
 
     // Calculate end time using explicit timezone
@@ -38,7 +39,7 @@ export const createBooking = async (
     );
 
     if (hasConflict) {
-        throw new Error('Time slot is already booked');
+        throw new Error('Horário já reservado');
     }
 
     // 2. Check provider availability
@@ -49,7 +50,7 @@ export const createBooking = async (
     );
 
     if (!isAvailable) {
-        throw new Error('Provider is not available at this time');
+        throw new Error('Prestador não está disponível neste horário');
     }
 
     // Calculate final price with discount
@@ -84,8 +85,23 @@ export const createBooking = async (
     const dateStr = format(startTime, 'yyyy-MM-dd');
     await invalidateSlots(service.providerId, dateStr);
 
-    // Notificar prestador
+    // Notificar prestador (in-app)
     await notificationService.createBookingNotification(booking.id);
+
+    // Enviar email para o prestador
+    const fullBooking = await bookingRepository.findBookingById(booking.id);
+    if (fullBooking && fullBooking.serviceVariation.service.provider) {
+        await emailService.sendBookingNotification({
+            providerName: fullBooking.serviceVariation.service.provider.name,
+            providerEmail: fullBooking.serviceVariation.service.provider.email,
+            clientName: fullBooking.client.name,
+            serviceName: fullBooking.serviceVariation.service.name,
+            variationName: fullBooking.serviceVariation.name,
+            startTime: fullBooking.start_time,
+            endTime: fullBooking.end_time,
+            finalPrice: (fullBooking?.final_price ?? booking.final_price ?? 0).toString(),
+        });
+    }
 
     return booking;
 };
@@ -129,19 +145,19 @@ export const getBookingsByProvider = async (providerId: string, page: number = 1
 export const cancelBooking = async (bookingId: string, userId: string, userRole: string) => {
     const booking = await bookingRepository.findBookingById(bookingId);
     if (!booking) {
-        throw new Error('Booking not found');
+        throw new Error('Agendamento não encontrado');
     }
 
     // Get service variation and the related service to check provider
     const variation = await serviceRepository.findServiceVariationById(booking.serviceVariationId);
     if (!variation) {
-        throw new Error('Service variation not found');
+        throw new Error('Variação de serviço não encontrada');
     }
 
     // Fetch the service associated with the variation
     const service = await serviceRepository.findServiceById(variation.serviceId);
     if (!service) {
-        throw new Error('Service not found');
+        throw new Error('Serviço não encontrado');
     }
 
     // Check authorization
@@ -149,11 +165,11 @@ export const cancelBooking = async (bookingId: string, userId: string, userRole:
     const isProvider = userRole === 'PROVIDER' && service.providerId === userId;
 
     if (!isClient && !isProvider) {
-        throw new Error('Unauthorized');
+        throw new Error('Não autorizado');
     }
 
     if (booking.status === 'CANCELLED') {
-        throw new Error('Booking is already cancelled');
+        throw new Error('Agendamento já cancelado');
     }
 
     const updatedBooking = await bookingRepository.updateBookingStatus(bookingId, 'CANCELLED');
@@ -162,8 +178,23 @@ export const cancelBooking = async (bookingId: string, userId: string, userRole:
     const dateStr = format(booking.start_time, 'yyyy-MM-dd');
     await invalidateSlots(service.providerId, dateStr);
 
-    // Notificar sobre cancelamento
+    // Notificar sobre cancelamento (in-app)
     await notificationService.createCancellationNotification(bookingId, isClient ? 'CLIENT' : 'PROVIDER');
+
+    // Enviar email para o prestador
+    const fullBooking = await bookingRepository.findBookingById(bookingId);
+    if (fullBooking && fullBooking.serviceVariation.service.provider) {
+        await emailService.sendBookingCancellation({
+            providerName: fullBooking.serviceVariation.service.provider.name,
+            providerEmail: fullBooking.serviceVariation.service.provider.email,
+            clientName: fullBooking.client.name,
+            serviceName: fullBooking.serviceVariation.service.name,
+            variationName: fullBooking.serviceVariation.name,
+            startTime: fullBooking.start_time,
+            endTime: fullBooking.end_time,
+            finalPrice: (fullBooking?.final_price ?? updatedBooking.final_price ?? 0).toString(),
+        });
+    }
 
     return updatedBooking;
 };

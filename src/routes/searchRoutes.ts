@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import * as searchController from '../controllers/searchController';
-import { authenticate } from '../middlewares/auth';
+import { authenticate, optionalAuth } from '../middlewares/auth';
 
 const router = Router();
 
-// Busca pública
-router.get('/', searchController.search);
+// Busca pública (com autenticação opcional para salvar histórico)
+router.get('/', optionalAuth, searchController.search);
 
 // Buscas recentes (requer autenticação)
 router.get('/recent', authenticate, searchController.getRecent);
