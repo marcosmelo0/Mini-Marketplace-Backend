@@ -11,7 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 export const register = async (data: any): Promise<User> => {
     const existingUser = await userRepository.findUserByEmail(data.email);
     if (existingUser) {
-        throw new Error('User already exists');
+        throw new Error('Usuário já existe');
     }
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const { password, ...userData } = data;
@@ -26,11 +26,11 @@ export const register = async (data: any): Promise<User> => {
 export const login = async (data: any): Promise<{ token: string; refreshToken: string }> => {
     const user = await userRepository.findUserByEmail(data.email);
     if (!user) {
-        throw new Error('Invalid credentials');
+        throw new Error('Credenciais inválidas');
     }
     const isPasswordValid = await bcrypt.compare(data.password, user.password_hash);
     if (!isPasswordValid) {
-        throw new Error('Invalid credentials');
+        throw new Error('Credenciais inválidas');
     }
     const token = jwt.sign(
         {
@@ -56,7 +56,7 @@ export const login = async (data: any): Promise<{ token: string; refreshToken: s
 export const refresh = async (token: string): Promise<{ token: string; refreshToken: string }> => {
     const storedToken = await refreshTokenRepository.findRefreshToken(token);
     if (!storedToken || storedToken.revoked || storedToken.expiresAt < new Date()) {
-        throw new Error('Invalid refresh token');
+        throw new Error('Token de atualização inválido');
     }
 
     // Revoke old token (Rotation)

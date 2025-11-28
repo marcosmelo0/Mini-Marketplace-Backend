@@ -52,8 +52,8 @@ model Service {
     providerId  String
     name        String
     description String
-    category    String // Nova: Categoria do serviço (ex: "Manicure", "Barbeiro")
-    photos      String[] // Array of URLs
+    category    String
+    photos      String[]
     created_at  DateTime @default(now())
     updated_at  DateTime @updatedAt
 
@@ -61,7 +61,8 @@ model Service {
     variations ServiceVariation[]
     reviews    Review[]
 
-    @@index([category]) // Índice para filtrar por categoria
+    @@index([category])
+    @@index([providerId])
 }
 
 model ServiceVariation {
@@ -70,8 +71,8 @@ model ServiceVariation {
     name                String
     price               Decimal
     duration_minutes    Int
-    discount_percentage Int?     @default(0) // Nova: Desconto em %
-    discount_days       Int[]    @default([]) // Nova: Dias da semana com desconto (0-6)
+    discount_percentage Int?     @default(0)
+    discount_days       Int[]    @default([])
     created_at          DateTime @default(now())
     updated_at          DateTime @updatedAt
 
@@ -82,13 +83,15 @@ model ServiceVariation {
 model Availability {
     id          String   @id @default(uuid())
     providerId  String
-    day_of_week Int // 0-6 (Sun-Sat)
-    start_time  DateTime // Using DateTime to store time, ignoring date part or using a specific epoch
+    day_of_week Int
+    start_time  DateTime
     end_time    DateTime
     created_at  DateTime @default(now())
     updated_at  DateTime @updatedAt
 
     provider User @relation(fields: [providerId], references: [id])
+
+    @@index([providerId, day_of_week])
 }
 
 model Booking {
@@ -98,20 +101,25 @@ model Booking {
     start_time         DateTime
     end_time           DateTime
     status             BookingStatus @default(CONFIRMED)
-    final_price        Decimal? // Nova: Preço final após desconto
+    final_price        Decimal?
     created_at         DateTime      @default(now())
     updated_at         DateTime      @updatedAt
 
     client           User             @relation(fields: [clientId], references: [id])
     serviceVariation ServiceVariation @relation(fields: [serviceVariationId], references: [id])
     notifications    Notification[]
+
+    @@index([status, end_time])
+    @@index([clientId])
+    @@index([serviceVariationId])
+    @@index([start_time, end_time])
 }
 
 model Review {
     id         String   @id @default(uuid())
     serviceId  String
     clientId   String
-    rating     Int // 1-5
+    rating     Int
     comment    String?
     created_at DateTime @default(now())
     updated_at DateTime @updatedAt
@@ -119,13 +127,14 @@ model Review {
     service Service @relation(fields: [serviceId], references: [id])
     client  User    @relation(fields: [clientId], references: [id])
 
-    @@unique([serviceId, clientId]) // Um cliente só pode avaliar um serviço uma vez
+    @@unique([serviceId, clientId])
+    @@index([serviceId])
 }
 
 model Notification {
     id         String   @id @default(uuid())
     providerId String
-    type       String // "NEW_BOOKING", "BOOKING_CANCELLED"
+    type       String
     title      String
     message    String
     read       Boolean  @default(false)

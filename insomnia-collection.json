@@ -526,6 +526,25 @@
             "parentId": "folder_availabilities"
         },
         {
+            "_id": "req_get_slots",
+            "_type": "request",
+            "name": "Obter Slots Disponíveis (Público)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/availabilities/provider/PROVIDER_ID_AQUI/slots",
+            "parameters": [
+                {
+                    "name": "date",
+                    "value": "2025-11-28"
+                },
+                {
+                    "name": "serviceVariationId",
+                    "value": "VARIATION_ID_AQUI"
+                }
+            ],
+            "headers": [],
+            "parentId": "folder_availabilities"
+        },
+        {
             "_id": "folder_notifications",
             "_type": "request_group",
             "name": "🔔 Notificações",
@@ -582,7 +601,7 @@
         {
             "_id": "req_search",
             "_type": "request",
-            "name": "Buscar Serviços (Público)",
+            "name": "Buscar Serviços (Público/Opcional Auth)",
             "method": "GET",
             "url": "{{ _.base_url }}/search",
             "parameters": [
@@ -599,7 +618,27 @@
                     "value": "20"
                 }
             ],
-            "headers": [],
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}",
+                    "disabled": true
+                }
+            ],
+            "parentId": "folder_search"
+        },
+        {
+            "_id": "req_recent_searches",
+            "_type": "request",
+            "name": "Buscas Recentes (Autenticado)",
+            "method": "GET",
+            "url": "{{ _.base_url }}/search/recent",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer {{ _.token }}"
+                }
+            ],
             "parentId": "folder_search"
         },
         {

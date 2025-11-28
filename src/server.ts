@@ -2,6 +2,7 @@ import app from './app';
 import { prisma } from './config/prisma';
 import { initializeSearchIndex } from './config/initializeSearch';
 import './config/redis'; // Inicializar conexão Redis
+import { startBookingCompletionJob } from './jobs/completeBookings';
 
 const PORT = process.env.PORT || 3000;
 
@@ -15,6 +16,9 @@ async function main() {
         } catch (error) {
             console.warn('Elasticsearch not available:', error);
         }
+
+        // Start background jobs
+        startBookingCompletionJob();
 
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);

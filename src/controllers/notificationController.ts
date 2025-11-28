@@ -22,9 +22,9 @@ export const markAsRead = async (req: Request, res: Response) => {
         const result = await notificationService.markAsRead(id, providerId);
         res.json(result);
     } catch (error: any) {
-        if (error.message === 'Notification not found') {
+        if (error.message === 'Notificação não encontrada') {
             res.status(404).json({ error: error.message });
-        } else if (error.message === 'Unauthorized') {
+        } else if (error.message === 'Não autorizado') {
             res.status(403).json({ error: error.message });
         } else {
             res.status(500).json({ error: error.message });

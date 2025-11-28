@@ -57,11 +57,11 @@ export const getProviderNotifications = async (providerId: string, page: number 
 export const markAsRead = async (id: string, providerId: string) => {
     const notification = await notificationRepository.findNotificationById(id);
     if (!notification) {
-        throw new Error('Notification not found');
+        throw new Error('Notificação não encontrada');
     }
 
     if (notification.providerId !== providerId) {
-        throw new Error('Unauthorized');
+        throw new Error('Não autorizado');
     }
 
     return notificationRepository.markAsRead(id);

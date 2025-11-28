@@ -6,7 +6,7 @@ export const search = async (req: Request, res: Response) => {
     try {
         const query = req.query.q as string;
         if (!query) {
-            return res.status(400).json({ error: 'Query parameter "q" is required' });
+            return res.status(400).json({ error: 'Parâmetro de busca "q" é obrigatório' });
         }
 
         const page = parseInt(req.query.page as string) || 1;
@@ -32,7 +32,7 @@ export const getRecent = async (req: Request, res: Response) => {
     try {
         const user = (req as any).user;
         if (!user?.id) {
-            return res.status(401).json({ error: 'Unauthorized' });
+            return res.status(401).json({ error: 'Não autorizado' });
         }
 
         const searches = await getRecentSearches(user.id);

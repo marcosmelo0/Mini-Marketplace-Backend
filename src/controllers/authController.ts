@@ -49,7 +49,7 @@ export const refresh = async (req: Request, res: Response) => {
     try {
         const { refreshToken } = req.body;
         if (!refreshToken) {
-            return res.status(400).json({ error: 'Refresh token is required' });
+            return res.status(400).json({ error: 'Token de atualização é obrigatório' });
         }
         const tokens = await authService.refresh(refreshToken);
         res.json(tokens);

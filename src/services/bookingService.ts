@@ -18,12 +18,12 @@ export const createBooking = async (
     // Get service variation to calculate end time
     const variation = await serviceRepository.findServiceVariationById(data.serviceVariationId);
     if (!variation) {
-        throw new Error('Service variation not found');
+        throw new Error('Variação de serviço não encontrada');
     }
 
     const service = await serviceRepository.findServiceById(variation.serviceId);
     if (!service) {
-        throw new Error('Service not found');
+        throw new Error('Serviço não encontrado');
     }
 
     // Calculate end time using explicit timezone
@@ -38,7 +38,7 @@ export const createBooking = async (
     );
 
     if (hasConflict) {
-        throw new Error('Time slot is already booked');
+        throw new Error('Horário já reservado');
     }
 
     // 2. Check provider availability
@@ -49,7 +49,7 @@ export const createBooking = async (
     );
 
     if (!isAvailable) {
-        throw new Error('Provider is not available at this time');
+        throw new Error('Prestador não está disponível neste horário');
     }
 
     // Calculate final price with discount
@@ -129,19 +129,19 @@ export const getBookingsByProvider = async (providerId: string, page: number = 1
 export const cancelBooking = async (bookingId: string, userId: string, userRole: string) => {
     const booking = await bookingRepository.findBookingById(bookingId);
     if (!booking) {
-        throw new Error('Booking not found');
+        throw new Error('Agendamento não encontrado');
     }
 
     // Get service variation and the related service to check provider
     const variation = await serviceRepository.findServiceVariationById(booking.serviceVariationId);
     if (!variation) {
-        throw new Error('Service variation not found');
+        throw new Error('Variação de serviço não encontrada');
     }
 
     // Fetch the service associated with the variation
     const service = await serviceRepository.findServiceById(variation.serviceId);
     if (!service) {
-        throw new Error('Service not found');
+        throw new Error('Serviço não encontrado');
     }
 
     // Check authorization
@@ -149,11 +149,11 @@ export const cancelBooking = async (bookingId: string, userId: string, userRole:
     const isProvider = userRole === 'PROVIDER' && service.providerId === userId;
 
     if (!isClient && !isProvider) {
-        throw new Error('Unauthorized');
+        throw new Error('Não autorizado');
     }
 
     if (booking.status === 'CANCELLED') {
-        throw new Error('Booking is already cancelled');
+        throw new Error('Agendamento já cancelado');
     }
 
     const updatedBooking = await bookingRepository.updateBookingStatus(bookingId, 'CANCELLED');
