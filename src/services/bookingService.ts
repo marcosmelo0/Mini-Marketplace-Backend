@@ -2,6 +2,7 @@ import * as bookingRepository from '../repositories/bookingRepository';
 import * as serviceRepository from '../repositories/serviceRepository';
 import * as availabilityService from './availabilityService';
 import * as notificationService from './notificationService';
+import * as emailService from './emailService';
 import { invalidateSlots } from '../config/redis';
 import { toZonedTime } from 'date-fns-tz';
 import { format } from 'date-fns';
@@ -84,8 +85,23 @@ export const createBooking = async (
     const dateStr = format(startTime, 'yyyy-MM-dd');
     await invalidateSlots(service.providerId, dateStr);
 
-    // Notificar prestador
+    // Notificar prestador (in-app)
     await notificationService.createBookingNotification(booking.id);
+
+    // Enviar email para o prestador
+    const fullBooking = await bookingRepository.findBookingById(booking.id);
+    if (fullBooking && fullBooking.serviceVariation.service.provider) {
+        await emailService.sendBookingNotification({
+            providerName: fullBooking.serviceVariation.service.provider.name,
+            providerEmail: fullBooking.serviceVariation.service.provider.email,
+            clientName: fullBooking.client.name,
+            serviceName: fullBooking.serviceVariation.service.name,
+            variationName: fullBooking.serviceVariation.name,
+            startTime: fullBooking.start_time,
+            endTime: fullBooking.end_time,
+            finalPrice: (fullBooking?.final_price ?? booking.final_price ?? 0).toString(),
+        });
+    }
 
     return booking;
 };
@@ -162,8 +178,23 @@ export const cancelBooking = async (bookingId: string, userId: string, userRole:
     const dateStr = format(booking.start_time, 'yyyy-MM-dd');
     await invalidateSlots(service.providerId, dateStr);
 
-    // Notificar sobre cancelamento
+    // Notificar sobre cancelamento (in-app)
     await notificationService.createCancellationNotification(bookingId, isClient ? 'CLIENT' : 'PROVIDER');
+
+    // Enviar email para o prestador
+    const fullBooking = await bookingRepository.findBookingById(bookingId);
+    if (fullBooking && fullBooking.serviceVariation.service.provider) {
+        await emailService.sendBookingCancellation({
+            providerName: fullBooking.serviceVariation.service.provider.name,
+            providerEmail: fullBooking.serviceVariation.service.provider.email,
+            clientName: fullBooking.client.name,
+            serviceName: fullBooking.serviceVariation.service.name,
+            variationName: fullBooking.serviceVariation.name,
+            startTime: fullBooking.start_time,
+            endTime: fullBooking.end_time,
+            finalPrice: (fullBooking?.final_price ?? updatedBooking.final_price ?? 0).toString(),
+        });
+    }
 
     return updatedBooking;
 };

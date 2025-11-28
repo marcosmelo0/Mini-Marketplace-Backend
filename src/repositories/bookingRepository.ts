@@ -3,9 +3,20 @@ import prisma from '../config/prisma';
 
 export type BookingWithVariation = Prisma.BookingGetPayload<{
     include: {
+        client: true;
         serviceVariation: {
             include: {
-                service: true
+                service: {
+                    include: {
+                        provider: {
+                            select: {
+                                id: true;
+                                name: true;
+                                email: true;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -49,7 +60,17 @@ export const findBookingById = async (id: string): Promise<BookingWithVariation 
             client: true,
             serviceVariation: {
                 include: {
-                    service: true,
+                    service: {
+                        include: {
+                            provider: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                },
+                            },
+                        },
+                    },
                 },
             },
         },

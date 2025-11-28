@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { User } from '../lib/generated/prisma';
 import * as userRepository from '../repositories/userRepository';
 import * as refreshTokenRepository from '../repositories/refreshTokenRepository';
+import * as emailService from './emailService';
 import crypto from 'crypto';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
@@ -19,6 +20,10 @@ export const register = async (data: any): Promise<User> => {
         ...userData,
         password_hash: hashedPassword,
     });
+
+    // Enviar email de boas-vindas (opcional, não bloqueia o registro)
+    await emailService.sendWelcomeEmail(user.name, user.email, user.role);
+
     return user;
 };
 

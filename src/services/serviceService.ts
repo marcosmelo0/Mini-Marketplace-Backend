@@ -4,33 +4,16 @@ import { getCache, setCache, deleteCachePattern, incrementServiceViews } from '.
 
 export const SERVICE_TYPES = [
     'Manicure',
-    'Pedicure',
     'Cabelereiro',
     'Barbeiro',
     'Maquiagem',
-    'Depilação',
     'Massagem',
-    'Limpeza de Pele',
     'Eletricista',
     'Encanador',
-    'Pintor',
-    'Pedreiro',
     'Jardineiro',
     'Diarista',
-    'Babá',
-    'Cuidador de Idosos',
-    'Passeador de Cães',
-    'Adestrador',
     'Personal Trainer',
-    'Nutricionista',
-    'Psicólogo',
-    'Professor Particular',
     'Fotógrafo',
-    'Videomaker',
-    'DJ',
-    'Músico',
-    'Buffet',
-    'Decoração',
     'Outros'
 ];
 

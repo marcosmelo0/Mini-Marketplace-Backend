@@ -1,7 +1,8 @@
 import app from './app';
 import { prisma } from './config/prisma';
 import { initializeSearchIndex } from './config/initializeSearch';
-import './config/redis'; // Inicializar conexão Redis
+import './config/redis';
+import { verifyEmailConnection } from './config/email';
 import { startBookingCompletionJob } from './jobs/completeBookings';
 
 const PORT = process.env.PORT || 3000;
@@ -16,6 +17,9 @@ async function main() {
         } catch (error) {
             console.warn('Elasticsearch not available:', error);
         }
+
+        // Verificar conexão com serviço de email
+        await verifyEmailConnection();
 
         // Start background jobs
         startBookingCompletionJob();
