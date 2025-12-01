@@ -83,6 +83,7 @@ export const findBookingsByClient = async (clientId: string, skip?: number, take
         skip,
         take,
         include: {
+            client: true,
             serviceVariation: {
                 include: {
                     service: {
@@ -92,7 +93,6 @@ export const findBookingsByClient = async (clientId: string, skip?: number, take
                                     id: true,
                                     name: true,
                                     email: true,
-                                    phone: true,
                                 },
                             },
                         },
