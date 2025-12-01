@@ -2,6 +2,12 @@
 
 > Uma plataforma completa para conectar prestadores de serviços e clientes, com agendamento inteligente, busca avançada, avaliações e notificações por email.
 
+--- 
+
+Vídeo DEMO: https://youtu.be/HW6Kce8lf9g
+
+---
+
 ![NodeJS](https://img.shields.io/badge/Node.js-18+-green.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg)
@@ -362,13 +368,4 @@ NODE_ENV=production
 
 ---
 
-<<<<<<< HEAD
-## 📄 Licença
-
-ISC
-
----
-
-=======
->>>>>>> develop
 Feito com 💜 por [Marcos](https://github.com/marcosmelo0)
