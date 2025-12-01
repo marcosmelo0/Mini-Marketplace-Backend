@@ -35,7 +35,24 @@ export const login = async (req: Request, res: Response) => {
     try {
         const data = loginSchema.parse(req.body);
         const { token, refreshToken } = await authService.login(data);
-        res.json({ token, refreshToken });
+
+        const isProduction = process.env.NODE_ENV === 'production';
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? 'strict' : 'lax',
+            maxAge: 1 * 60 * 60 * 1000, 
+        });
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? 'strict' : 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        res.json({ message: 'Login realizado com sucesso' });
     } catch (error: any) {
         if (error instanceof z.ZodError) {
             res.status(400).json({ error: error.issues });
@@ -47,14 +64,43 @@ export const login = async (req: Request, res: Response) => {
 
 export const refresh = async (req: Request, res: Response) => {
     try {
-        const { refreshToken } = req.body;
+        const refreshToken = req.cookies.refreshToken;
+
         if (!refreshToken) {
             return res.status(400).json({ error: 'Token de atualização é obrigatório' });
         }
+
         const tokens = await authService.refresh(refreshToken);
-        res.json(tokens);
+
+        const isProduction = process.env.NODE_ENV === 'production';
+
+        res.cookie('token', tokens.token, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? 'strict' : 'lax',
+            maxAge: 1 * 60 * 60 * 1000,
+        });
+
+        res.cookie('refreshToken', tokens.refreshToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? 'strict' : 'lax',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        res.json({ message: 'Token atualizado com sucesso' });
     } catch (error: any) {
         res.status(401).json({ error: error.message });
+    }
+};
+
+export const logout = async (req: Request, res: Response) => {
+    try {
+        res.clearCookie('token');
+        res.clearCookie('refreshToken');
+        res.json({ message: 'Logout realizado com sucesso' });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
     }
 };
 
