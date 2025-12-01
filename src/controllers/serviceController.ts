@@ -56,8 +56,10 @@ export const getServices = async (req: Request, res: Response) => {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 20;
         const category = req.query.category as string | undefined;
+        const sort = req.query.sort as string | undefined;
+        const order = req.query.order as string | undefined;
 
-        const result = await serviceService.getAllServices(page, limit, category);
+        const result = await serviceService.getAllServices(page, limit, category, sort, order);
         res.json(result);
     } catch (error: any) {
         res.status(500).json({ error: error.message });

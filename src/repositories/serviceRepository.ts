@@ -75,11 +75,56 @@ export const countServicesByProvider = async (providerId: string): Promise<numbe
     });
 };
 
-export const findAllServices = async (skip?: number, take?: number, category?: string): Promise<Service[]> => {
+export const findAllServices = async (skip?: number, take?: number, category?: string, sort?: string, order?: string): Promise<Service[]> => {
+    // Para ordenação por preço, precisamos fazer de forma diferente
+    // pois Prisma não suporta ordenação por campos agregados de relações
+    if (sort === 'price') {
+        const sortOrder = order === 'asc' ? 'asc' : 'desc';
+
+        // Buscar todos os serviços da categoria (ou todos)
+        const allServices = await prisma.service.findMany({
+            where: category ? { category } : undefined,
+            include: {
+                variations: true,
+                provider: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phone: true,
+                    },
+                },
+            },
+        });
+
+        // Ordenar por preço mínimo das variações
+        const sorted = allServices.sort((a, b) => {
+            const minPriceA = Math.min(...a.variations.map(v => Number(v.price)));
+            const minPriceB = Math.min(...b.variations.map(v => Number(v.price)));
+            return sortOrder === 'asc' ? minPriceA - minPriceB : minPriceB - minPriceA;
+        });
+
+        // Aplicar paginação manualmente
+        return sorted.slice(skip || 0, (skip || 0) + (take || sorted.length));
+    }
+
+    // Para outros tipos de ordenação, usar orderBy do Prisma
+    let orderBy: any = { created_at: 'desc' }; // Default
+
+    if (sort && order) {
+        const sortOrder = order === 'asc' ? 'asc' : 'desc';
+
+        if (sort === 'createdAt') {
+            orderBy = { created_at: sortOrder };
+        }
+        // Adicionar mais campos de ordenação conforme necessário
+    }
+
     return prisma.service.findMany({
         where: category ? { category } : undefined,
         skip,
         take,
+        orderBy,
         include: {
             variations: true,
             provider: {

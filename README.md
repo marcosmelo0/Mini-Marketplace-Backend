@@ -85,22 +85,6 @@ O servidor estará rodando em `http://localhost:3000` 🚀
    # Cache (Redis)
    REDIS_URL="redis://localhost:6379"
 
-   # Email Configuration (SMTP)
-   SMTP_HOST="smtp.gmail.com"
-   SMTP_PORT="587"
-   SMTP_USER="seu-email@gmail.com"
-   SMTP_PASS="sua-senha-de-app"
-   EMAIL_FROM="noreply@minimarketplace.com"
-
-   # Servidor
-   PORT=3000
-   ```
-
-   **Nota sobre Email**: 
-   - Para Gmail, você precisa gerar uma "Senha de App" nas configurações de segurança da sua conta Google.
-   - Acesse: [Senhas de App do Google](https://myaccount.google.com/apppasswords)
-   - Outros provedores SMTP também funcionam (Outlook, SendGrid, etc.)
-
 2. **Infraestrutura**:
    Inicie os containers do Docker. Isso vai configurar o PostgreSQL, Redis e Elasticsearch para você.
    ```bash
@@ -144,11 +128,15 @@ A API é RESTful e retorna dados em JSON. Abaixo estão as principais rotas.
 > **Documentação Completa**: Veja o arquivo [BACKEND_SPEC.md](./BACKEND_SPEC.md) para documentação detalhada de todos os endpoints, modelos de dados e regras de negócio.
 
 ### 🔐 Autenticação
+
+> **Importante**: A API utiliza **HTTP-only cookies** para armazenar tokens JWT, aumentando a segurança contra ataques XSS.
+
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | `POST` | `/auth/register` | Cria uma nova conta (Cliente ou Provedor) |
-| `POST` | `/auth/login` | Autentica e retorna Token JWT |
-| `POST` | `/auth/refresh` | Renova o token de acesso |
+| `POST` | `/auth/login` | Autentica e define cookies HTTP-only com tokens |
+| `POST` | `/auth/refresh` | Renova o token de acesso (lê do cookie) |
+| `POST` | `/auth/logout` | Realiza logout e limpa os cookies |
 
 ### 👤 Usuários
 | Método | Rota | Descrição |
@@ -219,7 +207,6 @@ A API é RESTful e retorna dados em JSON. Abaixo estão as principais rotas.
 mini-marketplace/
 ├── 🐳 docker-compose.yml    # Serviços (DB, Redis, Elastic)
 ├── 📄 insomnia-collection.json # Coleção de testes
-├── 📄 BACKEND_SPEC.md       # Documentação completa da API
 ├── 📂 prisma/
 │   ├── schema.prisma        # Modelagem do Banco
 │   ├── migrations/          # Histórico de migrações
@@ -243,11 +230,13 @@ mini-marketplace/
 ## 🎯 Funcionalidades Técnicas
 
 ### 🔒 Segurança
+- **HTTP-only Cookies** para armazenamento seguro de tokens JWT
 - **JWT Authentication** com refresh tokens
+- **CORS** configurado com suporte a credenciais
 - **Helmet** para headers de segurança
-- **CORS** configurado
 - **Rate Limiting** para prevenir abuso
 - **Bcrypt** para hash de senhas
+- **SameSite** policy para proteção contra CSRF
 
 ### ⚡ Performance
 - **Redis** para cache de slots disponíveis (5 min TTL)
@@ -273,7 +262,7 @@ mini-marketplace/
 - Uso de `date-fns-tz` para conversões corretas
 
 ### 🤖 Jobs Automáticos
-- **Conclusão de Agendamentos**: Executa a cada minuto, marca agendamentos passados como `COMPLETED`
+- **Conclusão de Agendamentos**: Executa a cada 5 minutos, marca agendamentos passados como `COMPLETED`
 
 ---
 
@@ -350,6 +339,7 @@ SMTP_PORT=587
 SMTP_USER=seu-email@gmail.com
 SMTP_PASS=sua-senha-de-app
 EMAIL_FROM=noreply@minimarketplace.com
+FRONTEND_URL=https://seu-frontend.com
 PORT=3000
 NODE_ENV=production
 ```
@@ -370,25 +360,6 @@ NODE_ENV=production
    ```bash
    npm start
    ```
-
----
-
-## 📚 Documentação Adicional
-
-- **[BACKEND_SPEC.md](./BACKEND_SPEC.md)**: Documentação completa da API com todos os endpoints, modelos de dados, fluxos e regras de negócio
-- **[insomnia-collection.json](./insomnia-collection.json)**: Coleção do Insomnia para testar todos os endpoints
-
----
-
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou pull requests.
-
----
-
-## 📄 Licença
-
-ISC
 
 ---
 
