@@ -2,8 +2,7 @@ import cron from 'node-cron';
 import { prisma } from '../config/prisma';
 
 export const startBookingCompletionJob = () => {
-    // Run every minute
-    cron.schedule('* * * * *', async () => {
+    cron.schedule('*/5 * * * *', async () => {
         console.log('Running booking completion job...');
         const now = new Date();
 
