@@ -70,13 +70,13 @@ export const getServicesByProvider = async (providerId: string, page: number = 1
     };
 };
 
-export const getAllServices = async (page: number = 1, limit: number = 20, category?: string) => {
+export const getAllServices = async (page: number = 1, limit: number = 20, category?: string, sort?: string, order?: string) => {
     // Validar parâmetros
     const validPage = Math.max(1, page);
     const validLimit = Math.min(Math.max(1, limit), 100); // Máximo 100 por página
 
     // Tentar buscar do cache
-    const cacheKey = `services:all:${validPage}:${validLimit}:${category || 'all'}`;
+    const cacheKey = `services:all:${validPage}:${validLimit}:${category || 'all'}:${sort || 'createdAt'}:${order || 'desc'}`;
     const cached = await getCache(cacheKey);
     if (cached) {
         return cached;
@@ -84,7 +84,7 @@ export const getAllServices = async (page: number = 1, limit: number = 20, categ
 
     const skip = (validPage - 1) * validLimit;
     const [data, total] = await Promise.all([
-        serviceRepository.findAllServices(skip, validLimit, category),
+        serviceRepository.findAllServices(skip, validLimit, category, sort, order),
         serviceRepository.countAllServices(category),
     ]);
 

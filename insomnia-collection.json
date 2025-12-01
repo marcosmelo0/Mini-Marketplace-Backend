@@ -18,7 +18,8 @@
             "data": {
                 "base_url": "http://localhost:3000",
                 "token": "{% response 'body', 'req_login', 'b64::JC50b2tlbg==::46b', 'never', 60 %}",
-                "refreshToken": "{% response 'body', 'req_login', 'b64::JC5yZWZyZXNoVG9rZW4=::46b', 'never', 60 %}"
+                "refreshToken": "{% response 'body', 'req_login', 'b64::JC5yZWZyZXNoVG9rZW4=::46b', 'never', 60 %}",
+                "_note": "O backend usa HTTP-only cookies. Os tokens acima são para testes com Authorization header (fallback)."
             },
             "parentId": "wrk_mini_marketplace"
         },
@@ -98,6 +99,15 @@
                     "value": "application/json"
                 }
             ],
+            "parentId": "folder_auth"
+        },
+        {
+            "_id": "req_logout",
+            "_type": "request",
+            "name": "Logout",
+            "method": "POST",
+            "url": "{{ _.base_url }}/auth/logout",
+            "headers": [],
             "parentId": "folder_auth"
         },
         {

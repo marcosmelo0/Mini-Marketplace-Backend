@@ -16,7 +16,6 @@ export const createBooking = async (
         start_time: Date;
     }
 ) => {
-    // Get service variation to calculate end time
     const variation = await serviceRepository.findServiceVariationById(data.serviceVariationId);
     if (!variation) {
         throw new Error('Variação de serviço não encontrada');
@@ -27,11 +26,9 @@ export const createBooking = async (
         throw new Error('Serviço não encontrado');
     }
 
-    // Calculate end time using explicit timezone
     const startTime = toZonedTime(data.start_time, TIMEZONE);
     const endTime = new Date(startTime.getTime() + variation.duration_minutes * 60000);
 
-    // 1. Check for conflicts with other bookings
     const hasConflict = await bookingRepository.checkBookingConflict(
         data.serviceVariationId,
         startTime,
@@ -42,7 +39,6 @@ export const createBooking = async (
         throw new Error('Horário já reservado');
     }
 
-    // 2. Check provider availability
     const isAvailable = await availabilityService.checkTimeSlotAvailability(
         service.providerId,
         startTime,
@@ -53,9 +49,8 @@ export const createBooking = async (
         throw new Error('Prestador não está disponível neste horário');
     }
 
-    // Calculate final price with discount
     let finalPrice = variation.price;
-    const dayOfWeek = startTime.getDay(); // 0-6 (Sun-Sat)
+    const dayOfWeek = startTime.getDay(); 
 
     if (
         variation.discount_percentage &&
@@ -67,7 +62,6 @@ export const createBooking = async (
         finalPrice = new (variation.price.constructor as any)(Number(variation.price) - discountAmount);
     }
 
-    // Create booking
     const booking = await bookingRepository.createBooking({
         client: {
             connect: { id: clientId },
@@ -81,14 +75,11 @@ export const createBooking = async (
         final_price: finalPrice,
     });
 
-    // Invalidar cache de slots do prestador para esta data
     const dateStr = format(startTime, 'yyyy-MM-dd');
     await invalidateSlots(service.providerId, dateStr);
 
-    // Notificar prestador (in-app)
     await notificationService.createBookingNotification(booking.id);
 
-    // Enviar email para o prestador
     const fullBooking = await bookingRepository.findBookingById(booking.id);
     if (fullBooking && fullBooking.serviceVariation.service.provider) {
         await emailService.sendBookingNotification({
@@ -148,19 +139,16 @@ export const cancelBooking = async (bookingId: string, userId: string, userRole:
         throw new Error('Agendamento não encontrado');
     }
 
-    // Get service variation and the related service to check provider
     const variation = await serviceRepository.findServiceVariationById(booking.serviceVariationId);
     if (!variation) {
         throw new Error('Variação de serviço não encontrada');
     }
 
-    // Fetch the service associated with the variation
     const service = await serviceRepository.findServiceById(variation.serviceId);
     if (!service) {
         throw new Error('Serviço não encontrado');
     }
 
-    // Check authorization
     const isClient = userRole === 'CLIENT' && booking.clientId === userId;
     const isProvider = userRole === 'PROVIDER' && service.providerId === userId;
 
@@ -174,14 +162,11 @@ export const cancelBooking = async (bookingId: string, userId: string, userRole:
 
     const updatedBooking = await bookingRepository.updateBookingStatus(bookingId, 'CANCELLED');
 
-    // Invalidar cache de slots do prestador para esta data
     const dateStr = format(booking.start_time, 'yyyy-MM-dd');
     await invalidateSlots(service.providerId, dateStr);
 
-    // Notificar sobre cancelamento (in-app)
     await notificationService.createCancellationNotification(bookingId, isClient ? 'CLIENT' : 'PROVIDER');
 
-    // Enviar email para o prestador
     const fullBooking = await bookingRepository.findBookingById(bookingId);
     if (fullBooking && fullBooking.serviceVariation.service.provider) {
         await emailService.sendBookingCancellation({
